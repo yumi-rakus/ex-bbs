@@ -8,7 +8,7 @@
 
 	<h1>掲示板</h1>
 	
-	<form action="bbs.html" th:action="@{/post}" th:object="${articleForm}" method="post">
+	<form action="bbs.html" th:action="@{/post-article}" th:object="${articleForm}" method="post">
 		投稿者名:<input type="text" name="name" th:field="*{name}"><br>
 		投稿内容:<br>
 		<textarea rows="5" cols="50" name="content" th:field="*{content}"></textarea><br>
@@ -33,6 +33,15 @@
 					<br>
 				</div>
 			</div>
+			
+			<form action="bbs.html" th:action="@{/post-comment}" th:object="${commentForm}" method="post">
+				名前:<input type="text" name="name" th:field="*{name}"><br>
+				コメント:<br>
+				<textarea rows="5" cols="50" name="content" th:field="*{content}"></textarea><br>
+				<input type="hidden" name="articleId" th:value="${article.id}">
+				<button type="submit">コメント投稿</button>
+			</form>
+			
 		</div>
 	
 	</div>
