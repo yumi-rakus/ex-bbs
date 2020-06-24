@@ -20,8 +20,12 @@
 		<div th:object="${article}">
 			投稿者名:<span th:text="*{name}">name</span><br>
 			投稿内容:<br> 
-			<span th:text="*{content}" style="font-family: YuGothic,'Yu Gothic',sans-serif; font-weight: bold">content</span>
+			<span th:text="*{content}" style="font-family: YuGothic,'Yu Gothic',sans-serif; font-weight: bold">content</span><br>
 			<br>
+			<form action="bbs.html" th:action="@{/delete}" method="post">
+				<input type="hidden" name="id" th:value="*{id}">
+				<button type="submit">記事削除</button>
+			</form>
 			<br>
 			<br>
 			<div th:each="comment : *{commentList}">
