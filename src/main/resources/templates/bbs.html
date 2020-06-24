@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>掲示板</title>
+</head>
+<body>
+
+	<h1>掲示板</h1>
+
+	<div th:each="article : ${articleList}">
+		<div th:object="${article}">
+			投稿者名:<span th:text="*{name}">name</span><br>
+			投稿内容:<br> 
+			<span th:text="*{content}" style="font-family: YuGothic,'Yu Gothic',sans-serif; font-weight: bold">content</span>
+		</div>
+		<hr>
+	</div>
+
+</body>
+</html>
