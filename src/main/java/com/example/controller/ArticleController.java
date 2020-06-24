@@ -130,4 +130,23 @@ public class ArticleController {
 		return index(model);
 	}
 
+	/////////////////////////////////////////////////////
+	// ユースケース：記事とコメントを削除する
+	/////////////////////////////////////////////////////
+	/**
+	 * 記事とコメントを削除する.
+	 * 
+	 * @param id    (記事)ID
+	 * @param model モデル
+	 * @return 掲示板画面
+	 */
+	@RequestMapping("/delete")
+	public String deleteArticle(String id, Model model) {
+
+		commentRepository.deleteByArticleId(Integer.parseInt(id));
+		articleRepository.deleteById(Integer.parseInt(id));
+
+		return index(model);
+	}
+
 }
