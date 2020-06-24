@@ -21,7 +21,20 @@
 			投稿者名:<span th:text="*{name}">name</span><br>
 			投稿内容:<br> 
 			<span th:text="*{content}" style="font-family: YuGothic,'Yu Gothic',sans-serif; font-weight: bold">content</span>
+			<br>
+			<br>
+			<br>
+			<div th:each="comment : *{commentList}">
+				<div th:object="${comment}">
+					コメント者名:<span th:text="*{name}">name</span><br>
+					コメント内容:<br>
+					<span th:text="*{content}" style="font-family: YuGothic,'Yu Gothic',sans-serif; font-weight: bold">content</span>
+					<br>
+					<br>
+				</div>
+			</div>
 		</div>
+	
 	</div>
 
 </body>
