@@ -7,14 +7,21 @@
 <body>
 
 	<h1>掲示板</h1>
+	
+	<form action="bbs.html" th:action="@{/post}" th:object="${articleForm}" method="post">
+		投稿者名:<input type="text" name="name" th:field="*{name}"><br>
+		投稿内容:<br>
+		<textarea rows="5" cols="50" name="content" th:field="*{content}"></textarea><br>
+		<button type="submit">記事投稿</button>
+	</form>
 
 	<div th:each="article : ${articleList}">
+		<hr>
 		<div th:object="${article}">
 			投稿者名:<span th:text="*{name}">name</span><br>
 			投稿内容:<br> 
 			<span th:text="*{content}" style="font-family: YuGothic,'Yu Gothic',sans-serif; font-weight: bold">content</span>
 		</div>
-		<hr>
 	</div>
 
 </body>
