@@ -1,5 +1,11 @@
 package com.example.form;
 
+/**
+ * 記事投稿情報を受け取るフォーム.
+ * 
+ * @author yumi takahashi
+ *
+ */
 public class ArticleForm {
 
 	/**
