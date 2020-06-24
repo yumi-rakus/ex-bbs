@@ -11,6 +11,12 @@ import org.springframework.stereotype.Repository;
 
 import com.example.domain.Article;
 
+/**
+ * 記事情報を取得するリポジトリ.
+ * 
+ * @author yumi takahashi
+ *
+ */
 @Repository
 public class ArticleRepository {
 
