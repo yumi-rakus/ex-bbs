@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.example.domain.Article;
 import com.example.domain.Comment;
 import com.example.form.ArticleForm;
+import com.example.form.CommentForm;
 import com.example.repository.ArticleRepository;
 import com.example.repository.CommentRepository;
 
@@ -42,8 +43,18 @@ public class ArticleController {
 		return new ArticleForm();
 	}
 
+	/**
+	 * 使用するフォームオブジェクトをリクエストスコープに格納する.
+	 * 
+	 * @return フォーム
+	 */
+	@ModelAttribute
+	public CommentForm setUpCommentForm() {
+		return new CommentForm();
+	}
+
 	/////////////////////////////////////////////////////
-	// ユースケース：記事一覧を表示する
+	// ユースケース：記事一覧を表示する, コメントを表示する
 	/////////////////////////////////////////////////////
 	/**
 	 * 掲示板画面を表示する.
@@ -76,8 +87,8 @@ public class ArticleController {
 	 * @param model モデル
 	 * @return 掲示板画面
 	 */
-	@RequestMapping("/post")
-	public String post(ArticleForm form, Model model) {
+	@RequestMapping("/post-article")
+	public String insertArticle(ArticleForm form, Model model) {
 
 		Article article = new Article();
 
@@ -85,6 +96,33 @@ public class ArticleController {
 		article.setContent(form.getContent());
 
 		articleRepository.insert(article);
+
+		form.setName("");
+		form.setContent("");
+
+		return index(model);
+	}
+
+	/////////////////////////////////////////////////////
+	// ユースケース：コメントを投稿する
+	/////////////////////////////////////////////////////
+	/**
+	 * コメントを投稿する.
+	 * 
+	 * @param form  フォーム
+	 * @param model モデル
+	 * @return 掲示板画面
+	 */
+	@RequestMapping("/post-comment")
+	public String insertComment(CommentForm form, Model model) {
+
+		Comment comment = new Comment();
+
+		comment.setName(form.getName());
+		comment.setContent(form.getContent());
+		comment.setArticleId(Integer.parseInt(form.getArticleId()));
+
+		commentRepository.insert(comment);
 
 		form.setName("");
 		form.setContent("");
