@@ -30,6 +30,8 @@ public class Article {
 	 */
 	private List<Comment> commentList;
 
+	private Comment comment;
+
 	// constructor
 	public Article() {
 	}
@@ -75,10 +77,19 @@ public class Article {
 		this.commentList = commentList;
 	}
 
-	// toString
+	public Comment getComment() {
+		return comment;
+	}
+
+	public void setComment(Comment comment) {
+		this.comment = comment;
+	}
+
+	// toString commentiretene
 	@Override
 	public String toString() {
-		return "Article [id=" + id + ", name=" + name + ", content=" + content + ", commentList=" + commentList + "]";
+		return "Article [id=" + id + ", name=" + name + ", content=" + content + ", commentList=" + commentList
+				+ ", comment=" + comment + "]";
 	}
 
 }

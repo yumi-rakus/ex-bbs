@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import com.example.domain.Article;
+import com.example.domain.Comment;
 
 /**
  * 記事情報を取得するリポジトリ.
@@ -20,13 +21,22 @@ import com.example.domain.Article;
 @Repository
 public class ArticleRepository {
 
-	private static final RowMapper<Article> ARTICLE_ROW_MAPPER = (rs, i) -> {
+	private static final RowMapper<Article> ARTICLE_WITH_COMMENT_ROW_MAPPER = (rs, i) -> {
 
 		Article article = new Article();
 
 		article.setId(rs.getInt("id"));
 		article.setName(rs.getString("name"));
 		article.setContent(rs.getString("content"));
+
+		Comment comment = new Comment();
+
+		comment.setId(rs.getInt("com_id"));
+		comment.setName(rs.getString("com_name"));
+		comment.setContent(rs.getString("com_content"));
+		comment.setArticleId(rs.getInt("article_id"));
+
+		article.setComment(comment);
 
 		return article;
 	};
@@ -41,9 +51,12 @@ public class ArticleRepository {
 	 */
 	public List<Article> findAll() {
 
-		String sql = "SELECT * FROM articles ORDER BY id DESC";
+		String sql = "SELECT " + "art.id AS id, " + "art.name AS name, " + "art.content AS content, "
+				+ "com.id AS com_id, " + "com.name AS com_name, " + "com.content AS com_content, "
+				+ "com.article_id AS article_id " + "FROM articles AS art " + "FULL OUTER JOIN " + "comments AS com "
+				+ "ON art.id = com.article_id " + "ORDER BY art.id desc;";
 
-		List<Article> articleList = template.query(sql, ARTICLE_ROW_MAPPER);
+		List<Article> articleList = template.query(sql, ARTICLE_WITH_COMMENT_ROW_MAPPER);
 
 		return articleList;
 	}
@@ -65,15 +78,16 @@ public class ArticleRepository {
 	}
 
 	/**
-	 * 記事情報を削除する.
+	 * 記事情報とその記事に付随するコメント情報を削除する.
 	 * 
 	 * @param id ID
 	 */
 	public void deleteById(Integer id) {
 
-		String sql = "DELETE FROM articles WHERE id = :id";
+		String sql = "BEGIN; " + "DELETE FROM comments WHERE article_id = :articleId; "
+				+ "DELETE FROM articles WHERE id = :id; " + "COMMIT;";
 
-		SqlParameterSource param = new MapSqlParameterSource().addValue("id", id);
+		SqlParameterSource param = new MapSqlParameterSource().addValue("id", id).addValue("articleId", id);
 
 		template.update(sql, param);
 	}

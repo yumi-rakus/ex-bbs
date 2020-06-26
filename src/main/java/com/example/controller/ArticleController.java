@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -13,8 +15,10 @@ import com.example.domain.Article;
 import com.example.domain.Comment;
 import com.example.form.ArticleForm;
 import com.example.form.CommentForm;
+import com.example.form.ParentForm;
 import com.example.repository.ArticleRepository;
 import com.example.repository.CommentRepository;
+import com.example.service.ArticleService;
 
 /**
  * 記事情報を操作するコントローラ.
@@ -32,6 +36,9 @@ public class ArticleController {
 
 	@Autowired
 	private CommentRepository commentRepository;
+
+	@Autowired
+	private ArticleService articleService;
 
 	/**
 	 * 使用するフォームオブジェクトをリクエストスコープに格納する.
@@ -52,6 +59,11 @@ public class ArticleController {
 	public CommentForm setUpCommentForm() {
 		return new CommentForm();
 	}
+	
+	@ModelAttribute
+	public ParentForm setParentForm() {
+		return new ParentForm();
+	}
 
 	/////////////////////////////////////////////////////
 	// ユースケース：記事一覧を表示する, コメントを表示する
@@ -65,11 +77,10 @@ public class ArticleController {
 	@RequestMapping("")
 	public String index(Model model) {
 
-		List<Article> articleList = articleRepository.findAll();
+		List<Article> articleList = articleService.findAll();
 
-		for (Article article : articleList) {
-			List<Comment> commentList = commentRepository.findByArticleId(article.getId());
-			article.setCommentList(commentList);
+		if (articleList.size() == 0) {
+			model.addAttribute("articleNotExist", "記事が1件も存在しません");
 		}
 
 		model.addAttribute("articleList", articleList);
@@ -88,7 +99,11 @@ public class ArticleController {
 	 * @return 掲示板画面
 	 */
 	@RequestMapping("/post-article")
-	public String insertArticle(ArticleForm form, Model model) {
+	public String insertArticle(@Validated ArticleForm form, BindingResult result, Model model) {
+
+		if (result.hasErrors()) {
+			return index(model);
+		}
 
 		Article article = new Article();
 
@@ -114,18 +129,24 @@ public class ArticleController {
 	 * @return 掲示板画面
 	 */
 	@RequestMapping("/post-comment")
-	public String insertComment(CommentForm form, Model model) {
+	public String insertComment(@Validated ParentForm form, BindingResult result,  Model model) {
+
+		if (result.hasErrors()) {
+			return index(model);
+		}
 
 		Comment comment = new Comment();
+		
+		List<CommentForm> comform = form.getcomments();
 
-		comment.setName(form.getName());
-		comment.setContent(form.getContent());
-		comment.setArticleId(Integer.parseInt(form.getArticleId()));
+		comment.setName(comform.get(0).getName());
+		comment.setContent(comform.get(0).getContent());
+		comment.setArticleId(Integer.parseInt(comform.get(0).getArticleId()));
 
 		commentRepository.insert(comment);
 
-		form.setName("");
-		form.setContent("");
+		comform.get(0).setName("");
+		comform.get(0).setContent("");
 
 		return index(model);
 	}
@@ -143,7 +164,6 @@ public class ArticleController {
 	@RequestMapping("/delete")
 	public String deleteArticle(String id, Model model) {
 
-		commentRepository.deleteByArticleId(Integer.parseInt(id));
 		articleRepository.deleteById(Integer.parseInt(id));
 
 		return index(model);

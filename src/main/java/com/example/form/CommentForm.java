@@ -1,5 +1,8 @@
 package com.example.form;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
 /**
  * コメント投稿情報を受け取るフォーム.
  * 
@@ -16,11 +19,15 @@ public class CommentForm {
 	/**
 	 * 名前
 	 */
+	@NotBlank(message = "名前を入力してください")
+	@Size(max = 50, message = "名前は50字以内で入力してください")
 	private String name;
 
 	/**
 	 * コメント内容
 	 */
+	@NotBlank(message = "コメント内容を入力してください")
+	@Size(max = 140, message = "コメント内容は140字以内で入力してください")
 	private String content;
 
 	// getter setter
