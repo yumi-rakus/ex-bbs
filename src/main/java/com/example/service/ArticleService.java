@@ -25,37 +25,22 @@ public class ArticleService {
 		List<Article> articleList = articleRepository.findAll();
 
 		Map<Integer, List<Comment>> commentMap = new LinkedHashMap<>();
+
+		for (Article article : articleList) { // commentMapにArrayListを格納
+			commentMap.put(article.getComment().getArticleId(), new ArrayList<Comment>());
+		}
+
+		for (Article article : articleList) { // commentMapにキー名articleIdでコメントリストにコメントを格納
+			List<Comment> commentList = commentMap.get(article.getComment().getArticleId());
+			commentList.add(article.getComment());
+		}
+
 		Map<Integer, Article> articleMap = new LinkedHashMap<>();
 
-		// commentMapにArrayListを格納
-		for (Article article : articleList) {
-			List<Comment> commentList = new ArrayList<>();
-			commentMap.put(article.getComment().getArticleId(), commentList);
-		}
-
-		// commentMapにキー名articleIdでコメントリストにコメントを格納
-		for (Article article : articleList) {
-
-			List<Comment> commentList = commentMap.get(article.getComment().getArticleId());
-
-			commentList.add(article.getComment());
-
-		}
-
-		// articleMapにArticleオブジェクトを格納
-		for (Article article : articleList) {
-
-			Article art = new Article();
-
-			art.setId(article.getId());
-			art.setName(article.getName());
-			art.setContent(article.getContent());
-
+		for (Article article : articleList) { // articleMapにArticleオブジェクトを格納
 			List<Comment> commentList = commentMap.get(article.getId());
-
-			art.setCommentList(commentList);
-
-			articleMap.put(article.getId(), art);
+			article.setCommentList(commentList);
+			articleMap.put(article.getId(), article);
 		}
 
 		List<Article> distivctArticleList = new ArrayList<>(articleMap.values());
