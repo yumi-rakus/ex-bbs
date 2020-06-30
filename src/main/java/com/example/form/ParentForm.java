@@ -7,15 +7,15 @@ import javax.validation.Valid;
 public class ParentForm {
 
 	@Valid
-	private List<CommentForm> comments;
+	private List<CommentForm> articleInfoList;
 
 	// getter setter
-	public List<CommentForm> getcomments() {
-		return comments;
+	public List<CommentForm> getArticleInfoList() {
+		return articleInfoList;
 	}
 
-	public void setReceiveFormList(List<CommentForm> comments) {
-		this.comments = comments;
+	public void setArticleInfoList(List<CommentForm> articleInfoList) {
+		this.articleInfoList = articleInfoList;
 	}
 
 }
