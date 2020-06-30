@@ -2,11 +2,16 @@ package com.example.repository;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import com.example.domain.Article;
@@ -44,6 +49,17 @@ public class ArticleRepository {
 	@Autowired
 	private NamedParameterJdbcTemplate template;
 
+	private SimpleJdbcInsert insert;
+
+	@PostConstruct // 自動採番準備
+	public void init() {
+		SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert((JdbcTemplate) template.getJdbcOperations());
+
+		SimpleJdbcInsert withTableName = simpleJdbcInsert.withTableName("articles");
+		insert = withTableName.usingGeneratedKeyColumns("id");
+
+	}
+
 	/**
 	 * 記事情報を全件取得する.
 	 * 
@@ -54,7 +70,7 @@ public class ArticleRepository {
 		String sql = "SELECT " + "art.id AS id, " + "art.name AS name, " + "art.content AS content, "
 				+ "com.id AS com_id, " + "com.name AS com_name, " + "com.content AS com_content, "
 				+ "com.article_id AS article_id " + "FROM articles AS art " + "FULL OUTER JOIN " + "comments AS com "
-				+ "ON art.id = com.article_id " + "ORDER BY art.id desc;";
+				+ "ON art.id = com.article_id " + "ORDER BY art.id desc, com.id;";
 
 		List<Article> articleList = template.query(sql, ARTICLE_WITH_COMMENT_ROW_MAPPER);
 
@@ -66,14 +82,15 @@ public class ArticleRepository {
 	 * 
 	 * @param article 記事情報
 	 */
-	public void insert(Article article) {
+	public Article insert(Article article) {
 
-		String sql = "INSERT INTO articles (name, content) VALUES (:name, :content)";
+		SqlParameterSource param = new BeanPropertySqlParameterSource(article);
 
-		SqlParameterSource param = new MapSqlParameterSource().addValue("name", article.getName()).addValue("content",
-				article.getContent());
+		Number key = insert.executeAndReturnKey(param);
 
-		template.update(sql, param);
+		article.setId(key.intValue());
+
+		return article;
 
 	}
 
