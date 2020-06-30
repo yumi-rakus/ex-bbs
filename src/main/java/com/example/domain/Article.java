@@ -30,6 +30,9 @@ public class Article {
 	 */
 	private List<Comment> commentList;
 
+	/**
+	 * コメント情報
+	 */
 	private Comment comment;
 
 	// constructor
@@ -85,7 +88,7 @@ public class Article {
 		this.comment = comment;
 	}
 
-	// toString commentiretene
+	// toString
 	@Override
 	public String toString() {
 		return "Article [id=" + id + ", name=" + name + ", content=" + content + ", commentList=" + commentList
