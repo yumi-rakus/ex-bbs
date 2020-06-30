@@ -1,12 +1,17 @@
 package com.example.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +45,9 @@ public class ArticleController {
 	@Autowired
 	private ArticleService articleService;
 
+	@Autowired
+	private ServletContext application;
+
 	/**
 	 * 使用するフォームオブジェクトをリクエストスコープに格納する.
 	 * 
@@ -59,11 +67,7 @@ public class ArticleController {
 	public CommentForm setUpCommentForm() {
 		return new CommentForm();
 	}
-	
-	@ModelAttribute
-	public ParentForm setParentForm() {
-		return new ParentForm();
-	}
+
 
 	/////////////////////////////////////////////////////
 	// ユースケース：記事一覧を表示する, コメントを表示する
@@ -74,16 +78,38 @@ public class ArticleController {
 	 * @param model モデル
 	 * @return 掲示板画面
 	 */
+
 	@RequestMapping("")
 	public String index(Model model) {
 
 		List<Article> articleList = articleService.findAll();
 
-		if (articleList.size() == 0) {
+		if (articleList.isEmpty()) {
 			model.addAttribute("articleNotExist", "記事が1件も存在しません");
+		} else {
+
+			List<CommentForm> articleInfoList = new ArrayList<>();
+
+			for (Article article : articleList) {
+				CommentForm commentForm = new CommentForm();
+
+				commentForm.setArticle(article);
+
+				articleInfoList.add(commentForm);
+			}
+
+			ParentForm parentForm = (ParentForm)application.getAttribute("parentForm");
+			
+			if(Objects.isNull(parentForm)) {
+				parentForm = new ParentForm();
+			}
+			
+			parentForm.setArticleInfoList(articleInfoList);
+			
+			application.setAttribute("parentForm", parentForm);
 		}
 
-		model.addAttribute("articleList", articleList);
+		
 
 		return "bbs";
 	}
@@ -102,7 +128,7 @@ public class ArticleController {
 	public String insertArticle(@Validated ArticleForm form, BindingResult result, Model model) {
 
 		if (result.hasErrors()) {
-			return index(model);
+			return "bbs";
 		}
 
 		Article article = new Article();
@@ -129,24 +155,25 @@ public class ArticleController {
 	 * @return 掲示板画面
 	 */
 	@RequestMapping("/post-comment")
-	public String insertComment(@Validated ParentForm form, BindingResult result,  Model model) {
+	public String insertComment(@Validated CommentForm cform, BindingResult result, 
+			Integer index, Model model) {
 
 		if (result.hasErrors()) {
-			return index(model);
+			return "bbs";
 		}
+		
+		
 
 		Comment comment = new Comment();
-		
-		List<CommentForm> comform = form.getcomments();
 
-		comment.setName(comform.get(0).getName());
-		comment.setContent(comform.get(0).getContent());
-		comment.setArticleId(Integer.parseInt(comform.get(0).getArticleId()));
+		comment.setName(cform.getName());
+		comment.setContent(cform.getContent());
+		comment.setArticleId(cform.getArticleId());
 
 		commentRepository.insert(comment);
 
-		comform.get(0).setName("");
-		comform.get(0).setContent("");
+		cform.setName("");
+		cform.setContent("");
 
 		return index(model);
 	}
