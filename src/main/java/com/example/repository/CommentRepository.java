@@ -2,11 +2,16 @@ package com.example.repository;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import com.example.domain.Comment;
@@ -35,6 +40,17 @@ public class CommentRepository {
 	@Autowired
 	private NamedParameterJdbcTemplate template;
 
+	private SimpleJdbcInsert insert;
+
+	@PostConstruct // 自動採番準備
+	public void init() {
+		SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert((JdbcTemplate) template.getJdbcOperations());
+
+		SimpleJdbcInsert withTableName = simpleJdbcInsert.withTableName("comments");
+		insert = withTableName.usingGeneratedKeyColumns("id");
+
+	}
+
 	/**
 	 * 記事IDからコメント情報一覧を取得する.
 	 * 
@@ -57,14 +73,15 @@ public class CommentRepository {
 	 * 
 	 * @param comment コメント情報
 	 */
-	public void insert(Comment comment) {
+	public Comment insert(Comment comment) {
 
-		String sql = "INSERT INTO comments (name, content, article_id) VALUES (:name, :content, :articleId)";
+		SqlParameterSource param = new BeanPropertySqlParameterSource(comment);
 
-		SqlParameterSource param = new MapSqlParameterSource().addValue("name", comment.getName())
-				.addValue("content", comment.getContent()).addValue("articleId", comment.getArticleId());
+		Number key = insert.executeAndReturnKey(param);
 
-		template.update(sql, param);
+		comment.setId(key.intValue());
+
+		return comment;
 	}
 
 	/**
